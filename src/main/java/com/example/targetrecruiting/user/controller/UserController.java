@@ -1,6 +1,7 @@
 package com.example.targetrecruiting.user.controller;
 
 import com.example.targetrecruiting.common.dto.ResponseDto;
+import com.example.targetrecruiting.user.dto.LoginRequestDto;
 import com.example.targetrecruiting.user.dto.SignupRequestDto;
 import com.example.targetrecruiting.user.dto.UserDto;
 import com.example.targetrecruiting.user.service.UserService;
@@ -26,6 +27,10 @@ public class UserController {
     }
 
     //로그인
+    @PostMapping("/login")
+    public ResponseDto<UserDto> login(@RequestBody LoginRequestDto loginRequestDto){
+        return userService.login(loginRequestDto);
+    }
     //로그아웃
     //회원수정
 }

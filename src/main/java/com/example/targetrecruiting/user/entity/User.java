@@ -2,7 +2,6 @@ package com.example.targetrecruiting.user.entity;
 
 import com.example.targetrecruiting.user.dto.SignupRequestDto;
 import jakarta.persistence.*;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -27,9 +26,7 @@ public class User {
     @Column
     private String profileImage;
 
-    @Builder
     public User(SignupRequestDto signupRequestDto) {
-        this.id = id;
         this.email = signupRequestDto.getEmail();
         this.password = signupRequestDto.getPassword();
         this.phoneNum = signupRequestDto.getPhoneNums();

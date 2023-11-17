@@ -1,6 +1,7 @@
 package com.example.targetrecruiting.user.service;
 
 import com.example.targetrecruiting.common.dto.ResponseDto;
+import com.example.targetrecruiting.user.dto.LoginRequestDto;
 import com.example.targetrecruiting.user.dto.SignupRequestDto;
 import com.example.targetrecruiting.user.dto.UserDto;
 import com.example.targetrecruiting.user.entity.User;
@@ -51,6 +52,22 @@ public class UserService {
             throw new IllegalArgumentException("이미 가입된 이메일 입니다.");
         }
         return ResponseDto.setSuccess(HttpStatus.OK,"사용 가능한 이메일입니다.");
+    }
+
+    //로그인
+    public ResponseDto<UserDto> login(LoginRequestDto loginRequestDto){
+        String email = loginRequestDto.getEmail();
+        String password = loginRequestDto.getPassword();
+
+        //이메일 패턴 검사
+        validateEmail(email);
+
+        User user = userRepository.findByEmail(email).orElseThrow(
+                ()-> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+        if (!password.matches(user.getPassword())){
+            throw new IllegalArgumentException("비밀번호가 틀립니다.");
+        }
+        return ResponseDto.setSuccess(HttpStatus.OK,"로그인 성공");
     }
 
     //이메일 패턴검사
