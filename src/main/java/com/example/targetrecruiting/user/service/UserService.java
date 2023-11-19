@@ -3,6 +3,7 @@ package com.example.targetrecruiting.user.service;
 import com.example.targetrecruiting.common.dto.ResponseDto;
 import com.example.targetrecruiting.user.dto.LoginRequestDto;
 import com.example.targetrecruiting.user.dto.SignupRequestDto;
+import com.example.targetrecruiting.user.dto.UpdateUserRequestDto;
 import com.example.targetrecruiting.user.dto.UserDto;
 import com.example.targetrecruiting.user.entity.User;
 import com.example.targetrecruiting.user.repository.UserRepository;
@@ -10,7 +11,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+import org.thymeleaf.util.StringUtils;
 
+import java.util.Objects;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -69,6 +73,38 @@ public class UserService {
         }
         return ResponseDto.setSuccess(HttpStatus.OK,"로그인 성공");
     }
+
+    //회원조회
+    public ResponseDto<UserDto> getUser(Long id){
+        User user = userRepository.findById(id).orElseThrow(
+                ()-> new IllegalArgumentException("회원을 찾을 수 없습니다."));
+
+        UserDto userDto =new UserDto(user.getId(), user.getEmail(), user.getPhoneNum(), user.getProfileImage());
+
+        return ResponseDto.setSuccess(HttpStatus.OK,"회원 조회 성공",userDto);
+    }
+
+    //회원 정보 수정
+//    public ResponseDto<UserDto> updateUser(Long id, UpdateUserRequestDto updateUserRequestDto , MultipartFile image,
+//                                           User user){
+//        if (!Objects.equals(id, user.getId())){
+//            throw new IllegalArgumentException("권한이 없습니다.");
+//        }
+//
+//        if (!StringUtils.equals(updateUserRequestDto.getPhoneNums(), user.getPhoneNum()) && userRepository.existByPhoneNum(updateUserRequestDto.getPhoneNums())){
+//            throw new IllegalArgumentException("사용중인 전화번호 입니다.");
+//        }
+//        validateNums(updateUserRequestDto.getPhoneNums());
+//
+//        String imageUrl = null;
+//        if (image == null){
+//            imageUrl = user.getProfileImage();
+//        }
+//        if (image != null){
+//            imageUrl = s3Service.upLoadFile(image);
+//
+//        }
+//    }
 
     //이메일 패턴검사
     private void validateEmail(String email){

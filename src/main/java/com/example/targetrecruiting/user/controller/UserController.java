@@ -3,11 +3,15 @@ package com.example.targetrecruiting.user.controller;
 import com.example.targetrecruiting.common.dto.ResponseDto;
 import com.example.targetrecruiting.user.dto.LoginRequestDto;
 import com.example.targetrecruiting.user.dto.SignupRequestDto;
+import com.example.targetrecruiting.user.dto.UpdateUserRequestDto;
 import com.example.targetrecruiting.user.dto.UserDto;
+import com.example.targetrecruiting.user.entity.User;
 import com.example.targetrecruiting.user.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/api/users")
@@ -31,6 +35,18 @@ public class UserController {
     public ResponseDto<UserDto> login(@RequestBody LoginRequestDto loginRequestDto){
         return userService.login(loginRequestDto);
     }
-    //로그아웃
+
+    //회원조회
+    @GetMapping("/{id}")
+    public ResponseDto<UserDto> getUser(@PathVariable Long id){
+        return userService.getUser(id);
+    }
+
     //회원수정
+    @PatchMapping(value = "{id}", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE,MediaType.APPLICATION_FORM_URLENCODED_VALUE})
+    public ResponseDto<UserDto> updateUser(@PathVariable Long id,
+                                           @RequestPart(name = "phoneNums") UpdateUserRequestDto updateUserRequestDto,
+                                           @RequestPart(name = "profileImage", required = false)MultipartFile image){
+        return userService.updateUser(id, updateUserRequestDto, image, new User());
+    }
 }

@@ -11,6 +11,8 @@ public interface UserRepository extends JpaRepository<User,Long> {
     //이메일 중복확인
     boolean existsByEmail(String email);
 
+    boolean existByPhoneNum(String phoneNums);
+
     Optional<User> findByPhoneNum(String phoneNums);
 
     Optional<User> findByEmail(String email);
