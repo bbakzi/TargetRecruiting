@@ -16,7 +16,7 @@ public class SignupRequestDto {
     private String password;
 
     @NotBlank(message = "필수 입력 값입니다.")
-    private String phoneNums;
+    private String phoneNum;
 
     private String profileImage;
 

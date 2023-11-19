@@ -6,5 +6,5 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 public class UpdateUserRequestDto {
-    private String phoneNums;
+    private String phoneNum;
 }

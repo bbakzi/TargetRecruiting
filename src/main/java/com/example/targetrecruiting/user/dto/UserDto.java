@@ -10,7 +10,7 @@ public class UserDto {
 
     private final String email;
 
-    private final String phoneNums;
+    private final String phoneNum;
 
     private final String profileImage;
 }

@@ -13,6 +13,8 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+
 @RestController
 @RequestMapping("/api/users")
 @RequiredArgsConstructor
@@ -43,10 +45,10 @@ public class UserController {
     }
 
     //회원수정
-    @PatchMapping(value = "{id}", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE,MediaType.APPLICATION_FORM_URLENCODED_VALUE})
+    @PatchMapping(value = "/{id}", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_FORM_URLENCODED_VALUE})
     public ResponseDto<UserDto> updateUser(@PathVariable Long id,
-                                           @RequestPart(name = "phoneNums") UpdateUserRequestDto updateUserRequestDto,
-                                           @RequestPart(name = "profileImage", required = false)MultipartFile image){
+                                           @RequestPart(name = "phoneNum") UpdateUserRequestDto updateUserRequestDto,
+                                           @RequestPart(name = "profileImage", required = false)MultipartFile image) throws IOException {
         return userService.updateUser(id, updateUserRequestDto, image, new User());
     }
 }

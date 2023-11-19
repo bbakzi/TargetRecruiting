@@ -1,6 +1,8 @@
 package com.example.targetrecruiting.user.entity;
 
 import com.example.targetrecruiting.user.dto.SignupRequestDto;
+import com.example.targetrecruiting.user.dto.UpdateUserRequestDto;
+import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -29,7 +31,12 @@ public class User {
     public User(SignupRequestDto signupRequestDto) {
         this.email = signupRequestDto.getEmail();
         this.password = signupRequestDto.getPassword();
-        this.phoneNum = signupRequestDto.getPhoneNums();
+        this.phoneNum = signupRequestDto.getPhoneNum();
         this.profileImage = signupRequestDto.getProfileImage();
+    }
+
+    public void updateUser(UpdateUserRequestDto updateUserRequestDto, @Nullable String imageUrl){
+        this.phoneNum = updateUserRequestDto.getPhoneNum();
+        this.profileImage = imageUrl;
     }
 }

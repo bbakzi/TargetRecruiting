@@ -1,6 +1,7 @@
 package com.example.targetrecruiting.user.service;
 
 import com.example.targetrecruiting.common.dto.ResponseDto;
+import com.example.targetrecruiting.common.util.S3Service;
 import com.example.targetrecruiting.user.dto.LoginRequestDto;
 import com.example.targetrecruiting.user.dto.SignupRequestDto;
 import com.example.targetrecruiting.user.dto.UpdateUserRequestDto;
@@ -14,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import org.thymeleaf.util.StringUtils;
 
+import java.io.IOException;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.regex.Matcher;
@@ -25,6 +27,7 @@ import java.util.regex.Pattern;
 
 public class UserService {
     private final UserRepository userRepository;
+    private final S3Service s3Service;
 
     //정규식
     private static final String EMAIL_PATTERN = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$";
@@ -35,7 +38,7 @@ public class UserService {
     public ResponseDto<UserDto> signup(SignupRequestDto signupRequestDto) {
         validateEmail(signupRequestDto.getEmail());
         validatePassword(signupRequestDto.getPassword());
-        validateNums(signupRequestDto.getPhoneNums());
+        validateNums(signupRequestDto.getPhoneNum());
 
         Optional<User> findPhoneNumsByEmail = userRepository.findByPhoneNum(signupRequestDto.getEmail());
         if (findPhoneNumsByEmail.isPresent()){
@@ -84,27 +87,31 @@ public class UserService {
         return ResponseDto.setSuccess(HttpStatus.OK,"회원 조회 성공",userDto);
     }
 
-    //회원 정보 수정
-//    public ResponseDto<UserDto> updateUser(Long id, UpdateUserRequestDto updateUserRequestDto , MultipartFile image,
-//                                           User user){
-//        if (!Objects.equals(id, user.getId())){
-//            throw new IllegalArgumentException("권한이 없습니다.");
-//        }
-//
-//        if (!StringUtils.equals(updateUserRequestDto.getPhoneNums(), user.getPhoneNum()) && userRepository.existByPhoneNum(updateUserRequestDto.getPhoneNums())){
-//            throw new IllegalArgumentException("사용중인 전화번호 입니다.");
-//        }
-//        validateNums(updateUserRequestDto.getPhoneNums());
-//
-//        String imageUrl = null;
-//        if (image == null){
-//            imageUrl = user.getProfileImage();
-//        }
-//        if (image != null){
-//            imageUrl = s3Service.upLoadFile(image);
-//
-//        }
-//    }
+    //회원정보수정
+    public ResponseDto<UserDto> updateUser(Long id, UpdateUserRequestDto updateUserRequestDto , MultipartFile image,
+                                           User user) throws IOException {
+        if (!Objects.equals(id, user.getId())){
+            throw new IllegalArgumentException("권한이 없습니다.");
+        }
+
+        if (!StringUtils.equals(updateUserRequestDto.getPhoneNum(), user.getPhoneNum()) && userRepository.existsByPhoneNum(updateUserRequestDto.getPhoneNum())){
+            throw new IllegalArgumentException("사용중인 전화번호 입니다.");
+        }
+        validateNums(updateUserRequestDto.getPhoneNum());
+
+        String imageUrl = null;
+
+        if (image == null){
+            imageUrl = user.getProfileImage();
+        }
+        if (image != null){
+            imageUrl = s3Service.uploadFile(image);
+        }
+        user.updateUser(updateUserRequestDto,imageUrl);
+            userRepository.save(user);
+
+            return ResponseDto.setSuccess(HttpStatus.OK, "회원정보 수정 성공!",null);
+        }
 
     //이메일 패턴검사
     private void validateEmail(String email){
