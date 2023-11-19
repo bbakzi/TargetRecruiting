@@ -1,20 +1,19 @@
 package com.example.targetrecruiting.user.service;
 
 import com.example.targetrecruiting.common.dto.ResponseDto;
+import com.example.targetrecruiting.common.jtw.JwtUtil;
 import com.example.targetrecruiting.common.util.S3Service;
-import com.example.targetrecruiting.user.dto.LoginRequestDto;
-import com.example.targetrecruiting.user.dto.SignupRequestDto;
-import com.example.targetrecruiting.user.dto.UpdateUserRequestDto;
-import com.example.targetrecruiting.user.dto.UserDto;
+import com.example.targetrecruiting.user.dto.*;
 import com.example.targetrecruiting.user.entity.User;
 import com.example.targetrecruiting.user.repository.UserRepository;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import org.thymeleaf.util.StringUtils;
-
 import java.io.IOException;
 import java.util.Objects;
 import java.util.Optional;
@@ -24,10 +23,11 @@ import java.util.regex.Pattern;
 @Service
 @RequiredArgsConstructor
 @Transactional
-
 public class UserService {
     private final UserRepository userRepository;
     private final S3Service s3Service;
+    private final PasswordEncoder passwordEncoder;
+    private final JwtUtil jwtUtil;
 
     //정규식
     private static final String EMAIL_PATTERN = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$";
@@ -40,8 +40,10 @@ public class UserService {
         validatePassword(signupRequestDto.getPassword());
         validateNums(signupRequestDto.getPhoneNum());
 
-        Optional<User> findPhoneNumsByEmail = userRepository.findByPhoneNum(signupRequestDto.getEmail());
-        if (findPhoneNumsByEmail.isPresent()){
+        String password = passwordEncoder.encode(signupRequestDto.getPassword());
+
+        Optional<User> findPhoneNumByEmail = userRepository.findByPhoneNum(signupRequestDto.getEmail());
+        if (findPhoneNumByEmail.isPresent()){
             throw new IllegalArgumentException("이미 가입된 번호 입니다.");
         }
 
@@ -62,7 +64,7 @@ public class UserService {
     }
 
     //로그인
-    public ResponseDto<UserDto> login(LoginRequestDto loginRequestDto){
+    public ResponseDto<UserDto> login(LoginRequestDto loginRequestDto, HttpServletResponse response){
         String email = loginRequestDto.getEmail();
         String password = loginRequestDto.getPassword();
 
@@ -71,9 +73,12 @@ public class UserService {
 
         User user = userRepository.findByEmail(email).orElseThrow(
                 ()-> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
-        if (!password.matches(user.getPassword())){
+
+        if (!passwordEncoder.matches(password, user.getPassword())){
             throw new IllegalArgumentException("비밀번호가 틀립니다.");
         }
+
+        jwtUtil.createAndSetToken(response, user.getEmail(), user.getId());
         return ResponseDto.setSuccess(HttpStatus.OK,"로그인 성공");
     }
 
@@ -88,13 +93,14 @@ public class UserService {
     }
 
     //회원정보수정
-    public ResponseDto<UserDto> updateUser(Long id, UpdateUserRequestDto updateUserRequestDto , MultipartFile image,
-                                           User user) throws IOException {
+    public ResponseDto<UserDto> updateUser(Long id, UpdateUserRequestDto updateUserRequestDto ,
+                                           MultipartFile image, User user) throws IOException {
         if (!Objects.equals(id, user.getId())){
             throw new IllegalArgumentException("권한이 없습니다.");
         }
 
-        if (!StringUtils.equals(updateUserRequestDto.getPhoneNum(), user.getPhoneNum()) && userRepository.existsByPhoneNum(updateUserRequestDto.getPhoneNum())){
+        if (!StringUtils.equals(updateUserRequestDto.getPhoneNum(), user.getPhoneNum())
+                                && userRepository.existsByPhoneNum(updateUserRequestDto.getPhoneNum())){
             throw new IllegalArgumentException("사용중인 전화번호 입니다.");
         }
         validateNums(updateUserRequestDto.getPhoneNum());
@@ -110,8 +116,27 @@ public class UserService {
         user.updateUser(updateUserRequestDto,imageUrl);
             userRepository.save(user);
 
-            return ResponseDto.setSuccess(HttpStatus.OK, "회원정보 수정 성공!",null);
+            return ResponseDto.setSuccess(HttpStatus.OK, "회원정보 수정 성공!");
         }
+    //비밀번호 변경
+    public ResponseDto<UserDto> updatePassword(Long id, UpdatePasswordRequestDto updatePasswordRequestDto, User user){
+        if (!Objects.equals(id,user.getId())){
+            throw new IllegalArgumentException("비밀번호 변경 권한이 없습니다.");
+        }
+        if (passwordEncoder.matches(updatePasswordRequestDto.getOldPassword(), user.getPassword())){
+            throw new IllegalArgumentException("현재 비밀번호가 일치 하지 않습니다.");
+        }
+        if (!updatePasswordRequestDto.getNewPassword().equals(updatePasswordRequestDto.getCheckNewPassword())){
+            throw new IllegalArgumentException("두개의 비밀번호가 일치하지 않습니다.");
+        }
+
+        validatePassword(updatePasswordRequestDto.getNewPassword());
+
+        user.updatePassword(passwordEncoder.encode(updatePasswordRequestDto.getNewPassword()));
+        userRepository.save(user);
+        return ResponseDto.setSuccess(HttpStatus.OK,"비밀번호 변경 완료");
+    }
+
 
     //이메일 패턴검사
     private void validateEmail(String email){

@@ -1,6 +1,7 @@
 package com.example.targetrecruiting.user.entity;
 
 import com.example.targetrecruiting.user.dto.SignupRequestDto;
+import com.example.targetrecruiting.user.dto.UpdatePasswordRequestDto;
 import com.example.targetrecruiting.user.dto.UpdateUserRequestDto;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
@@ -38,5 +39,9 @@ public class User {
     public void updateUser(UpdateUserRequestDto updateUserRequestDto, @Nullable String imageUrl){
         this.phoneNum = updateUserRequestDto.getPhoneNum();
         this.profileImage = imageUrl;
+    }
+
+    public void updatePassword(String newPassword){
+        this.password = newPassword;
     }
 }
