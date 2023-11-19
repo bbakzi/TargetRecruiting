@@ -45,7 +45,7 @@ public class WebSecurityConfig {
     public WebSecurityCustomizer webSecurityCustomizer() {
         // resources 접근 허용 설정
         return web -> web.ignoring()
-//                .requestMatchers(PathRequest.toH2Console())  // H2 > MySQL 전환시 삭제
+                .requestMatchers(PathRequest.toH2Console())  // H2 > MySQL 전환시 삭제
                 .requestMatchers(PathRequest.toStaticResources().atCommonLocations());
     }
 
@@ -72,6 +72,8 @@ public class WebSecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/api/statistics/design").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/statistics/photographer").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/portfolios/popularity").permitAll()
+                //swagger
+                .requestMatchers("/swagger*/**", "/v3/api-docs/**").permitAll()
                 .requestMatchers(CorsUtils::isPreFlightRequest).permitAll()
                 .anyRequest().authenticated()
                 .and()

@@ -52,6 +52,11 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 
     implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
+
+    //swagger
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.1.0'
+    // spring-doc for local test(swagger-ui)
+    implementation group: 'org.springdoc', name: 'springdoc-openapi-ui', version: '1.6.9'
 }
 
 tasks.named('bootBuildImage') {
