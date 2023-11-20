@@ -38,10 +38,10 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             filterChain.doFilter(request, response);
         } else {
             if (jwtUtil.validateToken(accessToken)) {
-                setAuthentication(jwtUtil.getUserInformToken(accessToken));
+                setAuthentication(jwtUtil.getUserInfoFromToken(accessToken));
             } else if (refreshToken != null && jwtUtil.refreshTokenValid(refreshToken)) {
                 //Refresh 토큰으로 유저명 가져오기
-                String userEmail = jwtUtil.getUserInformToken(refreshToken);
+                String userEmail = jwtUtil.getUserInfoFromToken(refreshToken);
                 //유저명으로 유저 정보 가져오기
                 User user = userRepository.findByEmail(userEmail).orElseThrow(
                         () -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
@@ -54,7 +54,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                 setAuthentication(userEmail);
 
                 log.info("New Refresh Token");
-                long refreshTime = jwtUtil.getExpiredTime(refreshToken);
+                long refreshTime = jwtUtil.getExpirationTime(refreshToken);
                 String newRefreshToken = jwtUtil.createNewRefreshToken(user.getEmail(), refreshTime, user.getId());
 
                 //Header AccessToken 추가

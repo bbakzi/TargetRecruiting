@@ -3,7 +3,6 @@ package com.example.targetrecruiting.common.security;
 import com.example.targetrecruiting.user.entity.User;
 import com.example.targetrecruiting.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
@@ -13,10 +12,12 @@ import org.springframework.stereotype.Service;
 public class UserDetailsServiceImpl implements UserDetailsService {
     private final UserRepository userRepository;
 
+
     @Override
-    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+    public UserDetailsImpl loadUserByUsername(String email) throws UsernameNotFoundException {
+
         User user = userRepository.findByEmail(email).orElseThrow(
-                ()-> new NullPointerException("Not found User")
+                () -> new NullPointerException("유저를 찾을 수 없습니다")
         );
         return new UserDetailsImpl(user);
     }

@@ -47,7 +47,7 @@ public class UserService {
             throw new IllegalArgumentException("이미 가입된 번호 입니다.");
         }
 
-        User user = new User(signupRequestDto);
+        User user = new User(password,signupRequestDto);
         userRepository.save(user);
         return ResponseDto.setSuccess(HttpStatus.OK, "회원가입 성공!");
     }
