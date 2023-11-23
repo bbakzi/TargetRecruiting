@@ -1,12 +1,15 @@
 package com.example.targetrecruiting.user.entity;
 
 import com.example.targetrecruiting.common.util.TimeStamped;
+import com.example.targetrecruiting.recruitingBoard.entity.Board;
 import com.example.targetrecruiting.user.dto.SignupRequestDto;
 import com.example.targetrecruiting.user.dto.UpdateUserRequestDto;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
+import java.util.List;
 
 @Entity(name = "users")
 @Getter
@@ -28,6 +31,9 @@ public class User extends TimeStamped {
 
     @Column
     private String profileImage;
+
+    @OneToMany(mappedBy = "user",cascade = CascadeType.ALL,fetch = FetchType.LAZY)
+    private List<Board> boardList;
 
     public User(SignupRequestDto signupRequestDto) {
         this.email = signupRequestDto.getEmail();

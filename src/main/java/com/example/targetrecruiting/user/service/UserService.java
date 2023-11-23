@@ -8,6 +8,7 @@ import com.example.targetrecruiting.user.entity.User;
 import com.example.targetrecruiting.user.repository.UserRepository;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -22,7 +23,7 @@ import java.util.regex.Pattern;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
+@Slf4j
 public class UserService {
     private final UserRepository userRepository;
     private final S3Service s3Service;
@@ -35,6 +36,7 @@ public class UserService {
     private static final String PHONENUMS_PATTERN = "^[0-9]{11}$";
 
     //회원가입
+    @Transactional
     public ResponseDto<UserDto> signup(SignupRequestDto signupRequestDto) {
         validateEmail(signupRequestDto.getEmail());
         validatePassword(signupRequestDto.getPassword());
@@ -53,6 +55,7 @@ public class UserService {
     }
 
     //이메일 중복검사
+    @Transactional(readOnly = true)
     public ResponseDto<Boolean> checkEmail(String email){
         validateEmail(email);
 
@@ -64,6 +67,7 @@ public class UserService {
     }
 
     //로그인
+    @Transactional
     public ResponseDto<UserDto> login(LoginRequestDto loginRequestDto, HttpServletResponse response){
         String email = loginRequestDto.getEmail();
         String password = loginRequestDto.getPassword();
@@ -83,6 +87,7 @@ public class UserService {
     }
 
     //회원조회
+    @Transactional(readOnly = true)
     public ResponseDto<UserDto> getUser(Long id){
         User user = userRepository.findById(id).orElseThrow(
                 ()-> new IllegalArgumentException("회원을 찾을 수 없습니다."));
@@ -93,6 +98,7 @@ public class UserService {
     }
 
     //회원정보수정
+    @Transactional
     public ResponseDto<UserDto> updateUser(Long id, UpdateUserRequestDto updateUserRequestDto ,
                                            MultipartFile image, User user) throws IOException {
         if (!Objects.equals(id, user.getId())){
@@ -119,11 +125,12 @@ public class UserService {
             return ResponseDto.setSuccess(HttpStatus.OK, "회원정보 수정 성공!");
         }
     //비밀번호 변경
+    @Transactional
     public ResponseDto<UserDto> updatePassword(Long id, UpdatePasswordRequestDto updatePasswordRequestDto, User user){
         if (!Objects.equals(id,user.getId())){
             throw new IllegalArgumentException("비밀번호 변경 권한이 없습니다.");
         }
-        if (passwordEncoder.matches(updatePasswordRequestDto.getOldPassword(), user.getPassword())){
+        if (!passwordEncoder.matches(updatePasswordRequestDto.getOldPassword(), user.getPassword())){
             throw new IllegalArgumentException("현재 비밀번호가 일치 하지 않습니다.");
         }
         if (!updatePasswordRequestDto.getNewPassword().equals(updatePasswordRequestDto.getCheckNewPassword())){

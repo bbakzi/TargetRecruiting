@@ -1,10 +1,8 @@
 package com.example.targetrecruiting.user.dto;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @Getter
-@AllArgsConstructor
 public class UserDto {
     private final Long id;
 
@@ -13,4 +11,11 @@ public class UserDto {
     private final String phoneNum;
 
     private final String profileImage;
+
+    public UserDto(Long id, String email, String phoneNum, String profileImage) {
+        this.id = id;
+        this.email = email;
+        this.phoneNum = phoneNum;
+        this.profileImage = profileImage;
+    }
 }
