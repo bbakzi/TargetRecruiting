@@ -37,12 +37,4 @@ public class BoardService {
 
         return ResponseDto.setSuccess(HttpStatus.OK,"게시글 작성 완료",new BoardDto(savedBoard));
     }
-
-    //게시글 상세조회
-    @Transactional(readOnly = true)
-    public ResponseDto<BoardDto> getBoard(Long id){
-        Board board = boardRepository.findById(id).orElseThrow(()-> new IllegalArgumentException("게시글을 찾을 수 없습니다."));
-
-        return ResponseDto.setSuccess(HttpStatus.OK,"게시글 상세조회 성공", new BoardDto(board));
-    }
 }

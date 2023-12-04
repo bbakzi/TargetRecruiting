@@ -24,8 +24,13 @@ public class Board extends TimeStamped {
     @Column(nullable = false)
     private String title;
 
-    @Column(nullable = false)
     private String content;
+
+    private String category;
+
+    private String filter;
+
+    private Long views;
 
     @JsonManagedReference
     @OneToMany(mappedBy = "board", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
@@ -36,11 +41,13 @@ public class Board extends TimeStamped {
     @ManyToOne
     private User user;
 
-    @Builder
     public Board (BoardRequestDto boardRequestDto, User user){
         this.title = boardRequestDto.getTitle();
         this.content = boardRequestDto.getContent();
         this.user = user;
+        this.category = boardRequestDto.getCategory();
+        this.filter = boardRequestDto.getFilter();
+        this.views = boardRequestDto.getViews();
     }
 
     public void setImageFile(List<BoardImage> boardImageList){

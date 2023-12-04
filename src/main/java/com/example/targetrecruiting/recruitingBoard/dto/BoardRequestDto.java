@@ -8,4 +8,7 @@ import lombok.NoArgsConstructor;
 public class BoardRequestDto {
     private String title;
     private  String content;
+    private String category;
+    private String filter;
+    private Long views;
 }
